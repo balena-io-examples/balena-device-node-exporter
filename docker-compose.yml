@@ -1,0 +1,8 @@
+version: '2'
+services:
+    node-exporter:
+        build: ./node-exporter
+        environment:
+            - 'SCRAPE_PORT=9100'
+        ports:
+            - '80:9100'
