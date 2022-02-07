@@ -1,8 +1,16 @@
 version: '2'
 services:
     node-exporter:
-        build: ./node-exporter
-        environment:
-            - 'SCRAPE_PORT=9100'
-        ports:
-            - '80:9100'
+        image: quay.io/prometheus/node-exporter:latest
+        command:
+            # NOTE: disable os-release collector; would only report the container
+            # OS, rather than balenaOS of the host
+            - '--no-collector.os'
+            # NOTE: disable filesystem collectors
+            - '--no-collector.btrfs'
+            - '--no-collector.xfs'
+            - '--no-collector.zfs'
+        network_mode: host
+        labels:
+            io.balena.features.sysfs: 1
+            io.balena.features.procfs: 1
