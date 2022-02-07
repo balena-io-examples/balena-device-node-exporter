@@ -1,8 +1,35 @@
 version: '2'
+
+volumes:
+    textfiledir: {}
+
 services:
     node-exporter:
-        build: ./node-exporter
+        image: quay.io/prometheus/node-exporter:latest
+        command:
+            # NOTE: disable os-release collector; would only report the container
+            # OS, rather than balenaOS of the host
+            - '--no-collector.os'
+            # NOTE: disable filesystem collectors
+            - '--no-collector.btrfs'
+            - '--no-collector.xfs'
+            - '--no-collector.zfs'
+            # NOTE: enable reporting of balena-specific metrics
+            - '--collector.textfile.directory=/textfiles'
+        volumes:
+            - textfiledir:/textfiles
+        network_mode: host
+        labels:
+            io.balena.features.sysfs: 1
+            io.balena.features.procfs: 1
+
+    balena-collector:
+        build: ./balena-collector
+        restart: no
         environment:
-            - 'SCRAPE_PORT=9100'
-        ports:
-            - '80:9100'
+            - TEXTFILEDIR=/textfiles
+        volumes:
+            - textfiledir:/textfiles
+        labels:
+            io.balena.features.supervisor-api: 1
+            io.balena.features.balena-socket: 1
