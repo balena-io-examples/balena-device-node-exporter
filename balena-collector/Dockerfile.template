@@ -1,0 +1,12 @@
+ARG BALENA_MACHINE_NAME=%%BALENA_MACHINE_NAME%%
+FROM balenalib/${BALENA_MACHINE_NAME}-alpine:run
+
+RUN install_packages curl jq
+
+ENV TEXTFILEDIR=/textfiles
+VOLUME /textfiles
+
+COPY ./commit_metric.sh /usr/local/bin/commit_metric
+COPY ./entry.sh /usr/local/bin/
+
+CMD ["entry.sh"]

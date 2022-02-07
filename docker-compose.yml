@@ -1,4 +1,8 @@
 version: '2'
+
+volumes:
+    textfiledir: {}
+
 services:
     node-exporter:
         image: quay.io/prometheus/node-exporter:latest
@@ -10,7 +14,22 @@ services:
             - '--no-collector.btrfs'
             - '--no-collector.xfs'
             - '--no-collector.zfs'
+            # NOTE: enable reporting of balena-specific metrics
+            - '--collector.textfile.directory=/textfiles'
+        volumes:
+            - textfiledir:/textfiles
         network_mode: host
         labels:
             io.balena.features.sysfs: 1
             io.balena.features.procfs: 1
+
+    balena-collector:
+        build: ./balena-collector
+        restart: no
+        environment:
+            - TEXTFILEDIR=/textfiles
+        volumes:
+            - textfiledir:/textfiles
+        labels:
+            io.balena.features.supervisor-api: 1
+            io.balena.features.balena-socket: 1
